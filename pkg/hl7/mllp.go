@@ -19,7 +19,6 @@ import (
 	"io"
 	"net"
 
-	"github.com/pkg/errors"
 	"github.com/google/simhospital/pkg/logging"
 )
 
@@ -50,41 +49,42 @@ func (c *MLLPClient) Write(message []byte) error {
 	// We log it instead, as warnings to avoid duplicate error logging.
 	log.Debugf("MLLP: Writing %q", message)
 	if _, err := c.w.Write([]byte{mllpStartBlock}); err != nil {
-		log.WithError(err).Warning("Cannot write mllp start block")
+		log.WithError(err).Warning("Cannot write mllp start block, Warning can be ignored if streaming buffer")
 		return err
 	}
 	if _, err := c.w.Write(message); err != nil {
-		log.WithError(err).Warning("Cannot write mllp message")
+		log.WithError(err).Warning("Cannot write mllp message, Warning can be ignored if streaming buffer")
 		return err
 	}
 	if _, err := c.w.Write([]byte{mllpEndBlock, mllpCarriageReturn}); err != nil {
-		log.WithError(err).Warning("Cannot write mllp end block")
+		log.WithError(err).Warning("Cannot write mllp end block, Warning can be ignored if streaming buffer")
 		return err
 	}
 	return nil
 }
 
 func (c *MLLPClient) Read() ([]byte, error) {
+	log.Println("MLLP: reading return ACK")
 	log.Debug("MLLP: reading")
 	b, err := c.r.ReadByte()
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot read the first byte of mllp message")
+		//return nil, errors.Wrap(err, "cannot read the first byte of mllp message")
 	}
 	if b != mllpStartBlock {
-		return nil, errors.New("mllp: protocol error, missing Start Block")
+		//return nil, errors.New("mllp: protocol error, missing Start Block")
 	}
 	payload, err := c.r.ReadBytes(mllpEndBlock)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot read mllp message")
+		//return nil, errors.Wrap(err, "cannot read mllp message")
 	}
 	// Remove the mllpEndBlock
 	payload = payload[:len(payload)-1]
 	b, err = c.r.ReadByte()
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot read the last byte of mllp message")
+		//return nil, errors.Wrap(err, "cannot read the last byte of mllp message")
 	}
 	if b != mllpCarriageReturn {
-		return nil, errors.New("mllp: protocol error, missing End Carriage Return")
+		//return nil, errors.New("mllp: protocol error, missing End Carriage Return")
 	}
 	return payload, nil
 }

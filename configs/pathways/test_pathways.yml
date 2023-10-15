@@ -42,3 +42,12 @@ test_pathway_four_messages:
             abnormal_flag: HIGH
     - discharge: {}
     - generate_resources: {}
+
+    # test
+test_pathway_ADT_A04:
+  percentage_of_patients: 100.0
+  pathway:
+    - registration:
+        patient_class: 
+    #- generate_resources: {}
+#end.
